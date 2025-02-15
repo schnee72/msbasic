@@ -14,10 +14,11 @@ IN    = $0200                          ; Input buffer
 
 RESET:
                 CLD                     ; Clear decimal arithmetic mode.
+                JSR     INIT_BUFFER     ; Initialize input buffer.
                 CLI
                 LDA     #$1F           ; 8-N-1, 19200 baud.
                 STA     ACIA_CTRL
-                LDY     #$8B           ; No parity, no echo, no interrupts.
+                LDY     #$89           ; No parity, no echo, no interrupts.
                 STY     ACIA_CMD
 
 NOTCR:
@@ -44,12 +45,9 @@ BACKSPACE:      DEY                    ; Back up text index.
                 BMI     GETLINE        ; Beyond start of line, reinitialize.
 
 NEXTCHAR:
-                LDA     ACIA_STATUS    ; Check status.
-                AND     #$08           ; Key ready?
-                BEQ     NEXTCHAR       ; Loop until ready.
-                LDA     ACIA_DATA      ; Load character. B7 will be '0'.
+                JSR     CHRIN          ; Get character.
+                BCC     NEXTCHAR       ; No key pressed.
                 STA     IN,Y           ; Add to text buffer.
-                JSR     ECHO           ; Display character.
                 CMP     #$0D           ; CR?
                 BNE     NOTCR          ; No.
 
