@@ -15,6 +15,8 @@ ACIA_DATA       = $5000
 ACIA_STATUS     = $5001
 ACIA_CMD        = $5002
 ACIA_CTRL       = $5003
+PORTA           = $6001
+DDRA            = $6003
 
 LOAD:
                 rts
@@ -38,8 +40,8 @@ CHRIN:
                 jsr     BUFFER_SIZE
                 cmp     #$B0
                 bcs     @mostly_full
-                lda     #$09
-                sta     ACIA_CMD
+                lda     #$00
+                sta     PORTA
 @mostly_full:
                 pla
                 plx
@@ -68,6 +70,10 @@ CHROUT:
 INIT_BUFFER:
                 lda READ_PTR          ; doesn't matter where we start
                 sta WRITE_PTR
+                lda #$01
+                sta DDRA
+                lda #$00
+                sta PORTA
                 rts
 
 ; Write a character (from the A register) to the circular input buffer
@@ -106,7 +112,7 @@ IRQ_HANDLER:
                 cmp     #$F0
                 bcc     @not_full
                 lda     #$01
-                sta     ACIA_CMD
+                sta     PORTA
 @not_full:
                 plx
                 pla
