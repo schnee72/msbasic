@@ -24,6 +24,7 @@ LOAD:
 SAVE:
                 rts
 
+
 ; Input a character from the serial interface.
 ; On return, carry flag indicates whether a key was pressed
 ; If a key was pressed, the key value will be in the A register
@@ -35,12 +36,13 @@ CHRIN:
                 jsr     BUFFER_SIZE
                 beq     @no_keypressed
                 jsr     READ_BUFFER
-                jsr     CHROUT              ; echo
+                jsr     CHROUT                  ; echo
                 pha
                 jsr     BUFFER_SIZE
                 cmp     #$B0
                 bcs     @mostly_full
-                lda     #$00
+                lda     #$fe
+                and     PORTA
                 sta     PORTA
 @mostly_full:
                 pla
@@ -51,6 +53,7 @@ CHRIN:
                 plx
                 clc
                 rts
+
 
 ; Output a character (from the A register) to the serial interface.
 ;
@@ -68,11 +71,12 @@ CHROUT:
 ; Initialize the circular input buffer
 ; Modifies: flags, A
 INIT_BUFFER:
-                lda READ_PTR          ; doesn't matter where we start
+                lda READ_PTR
                 sta WRITE_PTR
                 lda #$01
                 sta DDRA
-                lda #$00
+                lda #$fe
+                and PORTA
                 sta PORTA
                 rts
 
@@ -98,9 +102,10 @@ BUFFER_SIZE:
                 lda WRITE_PTR
                 sec
                 sbc READ_PTR
-                rts  
+                rts
 
-; Interupt request handler
+
+; Interrupt request handler
 IRQ_HANDLER:
                 pha
                 phx
@@ -112,6 +117,7 @@ IRQ_HANDLER:
                 cmp     #$F0
                 bcc     @not_full
                 lda     #$01
+                ora     PORTA
                 sta     PORTA
 @not_full:
                 plx
@@ -121,6 +127,7 @@ IRQ_HANDLER:
 .include "wozmon.s"
 
 .segment "RESETVEC"
-                .word   $0F00          ; NMI vector
-                .word   RESET          ; RESET vector
-                .word   IRQ_HANDLER    ; IRQ vector
+                .word   $0F00           ; NMI vector
+                .word   RESET           ; RESET vector
+                .word   IRQ_HANDLER     ; IRQ vector
+

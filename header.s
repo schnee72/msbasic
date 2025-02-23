@@ -12,5 +12,5 @@
         jmp     PR_WRITTEN_BY
 .endif
 .ifdef EATER
-        jmp     COLD_START
+        jmp COLD_START
 .endif

@@ -10,7 +10,8 @@ ZP_START2 = $0C
 ZP_START3 = $62
 ZP_START4 = $6D
 
-USR	:= GORESTART 
+; extra/override ZP variables
+USR := GORESTART
 
 ; constants
 SPACE_FOR_GOSUB := $3E
